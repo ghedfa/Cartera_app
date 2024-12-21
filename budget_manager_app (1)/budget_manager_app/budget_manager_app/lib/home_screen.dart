@@ -15,28 +15,10 @@ class WalletScreen extends StatefulWidget {
   _WalletScreenState createState() => _WalletScreenState();
 }
 
-<<<<<<< HEAD
-class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _screens = [
-    Scaffold(
-      backgroundColor: const Color(0xFF4B7BE5),
-      appBar: const CustomTopBar(title: 'Wallet'),
-      body: const Center(
-        child: Text('Wallet Page - Coming Soon',
-            style: TextStyle(fontSize: 24, color: Colors.white)),
-      ),
-    ),
-    const ReportMainScreen(),
-    const WishlistScreen(),
-    const ProfileScreen(),
-=======
 class _WalletScreenState extends State<WalletScreen> {
   List<Map<String, dynamic>> expenses = [
     {'title': 'Transportation', 'amount': 50.00, 'date': 'Today'},
     {'title': 'Food', 'amount': 15.00, 'date': 'Yesterday'},
->>>>>>> 8d6133b6656ae13638e4125df3d9685d4d524af9
   ];
 
   List<Map<String, dynamic>> incomes = [
@@ -52,27 +34,6 @@ class _WalletScreenState extends State<WalletScreen> {
   void initState() {
     super.initState();
     calculateBalance(); // Initial calculation of balance
-  }
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      switch (index) {
-        case 1:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const WishlistScreen()),
-          );
-          break;
-        case 2:
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ProfileScreen()),
-          );
-          break;
-      }
-    });
   }
 
   // Calculate total income, expenses, and balance
@@ -236,43 +197,6 @@ class _WalletScreenState extends State<WalletScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Navigation Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Your Wallet',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.notifications_outlined,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NotificationsPage(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
             // White Content Section
             Expanded(
               child: Container(

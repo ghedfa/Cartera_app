@@ -1,12 +1,12 @@
 import 'package:budget_manager_app/Reports/list_screen.dart';
-import 'package:budget_manager_app/profile_screen.dart';
 import 'package:budget_manager_app/Reports/reportsmonthly.dart';
 import 'package:budget_manager_app/Reports/reportsweekly.dart';
 import 'package:budget_manager_app/Reports/reportsyearly.dart';
 import 'package:budget_manager_app/Reports/search_screen.dart';
-import 'package:budget_manager_app/wishlist_screen.dart';
+import 'package:budget_manager_app/cubit/transaction_cubit.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ReportsdailyScreen extends StatefulWidget {
   const ReportsdailyScreen({super.key});
@@ -548,7 +548,19 @@ class _ReportsdailyScreenState extends State<ReportsdailyScreen> {
                           // Transactions List
                           Expanded(
                             flex: 2,
-                            child: _buildTransactionsList(),
+                            child:
+                                BlocBuilder<TransactionCubit, TransactionState>(
+                              builder: (context, state) {
+                                // Access the Cubit and get the transactions
+                                final transactions = context
+                                    .read<TransactionCubit>()
+                                    .getTopTransactions();
+
+                                // Call your function to build the list with the transactions from the Cubit
+                                return _buildTransactionsList(
+                                    transactions); // Pass transactions to your list builder
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -563,7 +575,7 @@ class _ReportsdailyScreenState extends State<ReportsdailyScreen> {
     );
   }
 
-  Widget _buildTransactionsList() {
+  Widget _buildTransactionsList(List<Map<String, dynamic>> transactions) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -592,8 +604,9 @@ class _ReportsdailyScreenState extends State<ReportsdailyScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: 3,
+              itemCount: transactions.length,
               itemBuilder: (context, index) {
+                final transaction = transactions[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Container(
@@ -621,21 +634,21 @@ class _ReportsdailyScreenState extends State<ReportsdailyScreen> {
                               color: Color(0xFF4B7BE5), size: 24),
                         ),
                         const SizedBox(width: 16),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Groceries',
-                                style: TextStyle(
+                                transaction['category'],
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Text(
-                                '12/1/2024',
-                                style: TextStyle(
+                                transaction['date'],
+                                style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey,
                                 ),
@@ -643,9 +656,9 @@ class _ReportsdailyScreenState extends State<ReportsdailyScreen> {
                             ],
                           ),
                         ),
-                        const Text(
-                          '1580.04DA',
-                          style: TextStyle(
+                        Text(
+                          transaction['amount'],
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF4B7BE5),
@@ -678,69 +691,6 @@ class _ReportsdailyScreenState extends State<ReportsdailyScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  final List<Widget> _screens = [
-    const ReportsdailyScreen(),
-    const ReportsdailyScreen(),
-    const WishlistScreen(),
-    const ProfileScreen(),
-  ];
-
-  int _selectedIndex = 1;
-
-  void _onItemTapped(BuildContext context, int index) {
-    // Use Navigator.push to navigate to the selected screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => _screens[index]),
-    );
-  }
-
-  Widget nav(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Report',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Wishlist',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF4B7BE5),
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index; // Update the index
-          });
-          _onItemTapped(context, index); // Navigate to the selected screen
-        },
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        elevation: 0,
       ),
     );
   }

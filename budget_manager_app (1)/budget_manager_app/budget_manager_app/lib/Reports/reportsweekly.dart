@@ -1,10 +1,8 @@
 import 'package:budget_manager_app/Reports/list_screen.dart';
-import 'package:budget_manager_app/profile_screen.dart';
 import 'package:budget_manager_app/Reports/reportsdaily.dart';
 import 'package:budget_manager_app/Reports/reportsmonthly.dart';
 import 'package:budget_manager_app/Reports/reportsyearly.dart';
 import 'package:budget_manager_app/Reports/search_screen.dart';
-import 'package:budget_manager_app/wishlist_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -636,68 +634,6 @@ class _ReportsweeklyScreenState extends State<ReportsweeklyScreen> {
   }
 
 /////////////////
-  final List<Widget> _screens = [
-    const ReportsdailyScreen(),
-    const ReportsdailyScreen(),
-    const WishlistScreen(),
-    const ProfileScreen(),
-  ];
-
-  int _selectedIndex = 1;
-
-  void _onItemTapped(BuildContext context, int index) {
-    // Use Navigator.push to navigate to the selected screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => _screens[index]),
-    );
-  }
-
-  Widget nav(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Report',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Wishlist',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF4B7BE5),
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index; // Update the index
-          });
-          _onItemTapped(context, index); // Navigate to the selected screen
-        },
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
-    );
-  }
 
   List<BarChartGroupData> _createBarGroups() {
     return List.generate(weeklyData.length, (index) {

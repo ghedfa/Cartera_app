@@ -575,6 +575,33 @@ class _ReportsdailyScreenState extends State<ReportsdailyScreen> {
     );
   }
 
+  Widget _getCategoryIcon(String category) {
+    switch (category) {
+      case 'Groceries':
+        return const Icon(Icons.shopping_cart,
+            size: 30, color: Color(0xFF4B7BE5));
+      case 'Transport':
+        return const Icon(Icons.directions_car,
+            size: 30, color: Color(0xFFFF7AA4));
+      case 'Entertainment':
+        return const Icon(Icons.movie, size: 30, color: Color(0xFF98FB98));
+      case 'Shopping':
+        return const Icon(Icons.shopping_bag,
+            size: 30, color: Color(0xFFFFA07A));
+      case 'Restaurant':
+        return const Icon(Icons.restaurant, size: 30, color: Color(0xFFDDA0DD));
+      case 'Health':
+        return const Icon(Icons.medical_services,
+            size: 30, color: Color(0xFF20B2AA));
+      case 'Bills':
+        return const Icon(Icons.receipt_long,
+            size: 30, color: Color(0xFFFFB6C1));
+      default:
+        return const Icon(Icons.attach_money,
+            size: 30, color: Color(0xFF4B7BE5));
+    }
+  }
+
   Widget _buildTransactionsList(List<Map<String, dynamic>> transactions) {
     return Container(
       decoration: BoxDecoration(
@@ -601,75 +628,77 @@ class _ReportsdailyScreenState extends State<ReportsdailyScreen> {
               ),
             ),
           ),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: transactions.length < 3 ? transactions.length : 3,
-            itemBuilder: (context, index) {
-              final transaction = transactions[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: transactions.length < 3
+                  ? transactions.length
+                  : 3, // Here you limit it to 3 items
+              itemBuilder: (context, index) {
+                final transaction = transactions[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
                         ),
-                        child:
-                            transaction['icon'] as Widget, // Use provided icon
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              transaction['category'],
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: _getCategoryIcon(transaction[
+                              'category']), // This gets the icon from the category
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                transaction['category'],
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              transaction['date'],
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
+                              const SizedBox(height: 4),
+                              Text(
+                                transaction['date'],
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Text(
-                        transaction['amount'],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF4B7BE5),
+                        Text(
+                          transaction['amount'],
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF4B7BE5),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),

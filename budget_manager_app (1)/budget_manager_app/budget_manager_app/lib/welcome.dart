@@ -24,7 +24,7 @@ class Welcome2Screen extends StatelessWidget {
                 SizedBox(
                   height: screenSize.height * 0.50,
                   child: Image.asset(
-                    'welcome_illustration.png',
+                    'image.png',
                     fit: BoxFit.contain,
                   ),
                 ),

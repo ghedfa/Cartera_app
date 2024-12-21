@@ -1,3 +1,4 @@
+import 'package:budget_manager_app/Reports/reportmain.dart';
 import 'package:flutter/material.dart';
 import 'profile_screen.dart';
 import 'wishlist_screen.dart';
@@ -22,14 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(fontSize: 24, color: Colors.white)),
       ),
     ),
-    Scaffold(
-      backgroundColor: const Color(0xFF4B7BE5),
-      appBar: const CustomTopBar(title: 'Report'),
-      body: const Center(
-        child: Text('Report Page - Coming Soon',
-            style: TextStyle(fontSize: 24, color: Colors.white)),
-      ),
-    ),
+    const ReportMainScreen(),
     const WishlistScreen(),
     const ProfileScreen(),
   ];

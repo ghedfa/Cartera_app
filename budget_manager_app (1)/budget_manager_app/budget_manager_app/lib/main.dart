@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'cubit/transaction_cubit.dart';
+=======
+import 'base_screen.dart';
+>>>>>>> 8d6133b6656ae13638e4125df3d9685d4d524af9
 import 'wishlist_screen.dart';
 import 'add_item_screen.dart';
 import 'login_screen.dart';
@@ -37,6 +41,24 @@ class MyApp extends StatelessWidget {
         initialRoute: '/welcome',
         routes: AppRoutes.routes,
       ),
+<<<<<<< HEAD
+=======
+      home: const LoginScreen(),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignUpScreen(),
+        '/forgot-password': (context) => const ForgotPasswordScreen(),
+        '/security-pin': (context) => const SecurityPinScreen(),
+        '/password-success': (context) => const PasswordSuccessScreen(),
+        '/wishlist': (context) => const WishlistScreen(),
+        '/add-item': (context) => const AddItemScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/personal-info': (context) => const PersonalInfoScreen(),
+        '/base': (context) => const BaseScreen(),
+        '/base-wishlist': (context) => const BaseScreen(initialIndex: 1),
+        '/base-profile': (context) => const BaseScreen(initialIndex: 2),
+      },
+>>>>>>> 8d6133b6656ae13638e4125df3d9685d4d524af9
     );
   }
 }

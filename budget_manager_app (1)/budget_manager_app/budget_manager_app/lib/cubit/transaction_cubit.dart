@@ -3,13 +3,14 @@ import 'package:bloc/bloc.dart';
 // Transaction Cubit State
 class TransactionState {
   final List<Map<String, dynamic>> transactions;
-
   TransactionState(this.transactions);
 }
 
 // Cubit for transaction management
 class TransactionCubit extends Cubit<TransactionState> {
-  TransactionCubit() : super(TransactionState([]));
+  TransactionCubit() : super(TransactionState([])) {
+    loadTransactions(); // Automatically load transactions on creation
+  }
 
   // Add a method to load transactions (simulating fetching from an API or database)
   void loadTransactions() {

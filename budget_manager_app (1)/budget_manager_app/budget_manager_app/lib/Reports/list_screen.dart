@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ListScreen extends StatelessWidget {
   const ListScreen({super.key});
-
   // Function to get category icon
   Widget _getCategoryIcon(String category) {
     switch (category) {
@@ -13,20 +12,20 @@ class ListScreen extends StatelessWidget {
             size: 30, color: Color(0xFF4B7BE5));
       case 'Transport':
         return const Icon(Icons.directions_car,
-            size: 30, color: Color(0xFF4B7BE5));
+            size: 30, color: Color(0xFFFF7AA4));
       case 'Entertainment':
-        return const Icon(Icons.movie, size: 30, color: Color(0xFF4B7BE5));
+        return const Icon(Icons.movie, size: 30, color: Color(0xFF98FB98));
       case 'Shopping':
         return const Icon(Icons.shopping_bag,
-            size: 30, color: Color(0xFF4B7BE5));
+            size: 30, color: Color(0xFFFFA07A));
       case 'Restaurant':
-        return const Icon(Icons.restaurant, size: 30, color: Color(0xFF4B7BE5));
+        return const Icon(Icons.restaurant, size: 30, color: Color(0xFFDDA0DD));
       case 'Health':
         return const Icon(Icons.medical_services,
-            size: 30, color: Color(0xFF4B7BE5));
+            size: 30, color: Color(0xFF20B2AA));
       case 'Bills':
         return const Icon(Icons.receipt_long,
-            size: 30, color: Color(0xFF4B7BE5));
+            size: 30, color: Color(0xFFFFB6C1));
       default:
         return const Icon(Icons.attach_money,
             size: 30, color: Color(0xFF4B7BE5));
@@ -36,7 +35,10 @@ class ListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('All Transactions')),
+      appBar: AppBar(
+        title: const Text('All Transactions'),
+        backgroundColor: const Color(0xFF4B7BE5),
+      ),
       body: BlocBuilder<TransactionCubit, TransactionState>(
         builder: (context, state) {
           // Use the transactions list from the Cubit

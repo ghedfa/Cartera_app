@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'base_screen.dart';
 import 'wishlist_screen.dart';
 import 'add_item_screen.dart';
 import 'login_screen.dart';
@@ -37,6 +38,9 @@ class MyApp extends StatelessWidget {
         '/add-item': (context) => const AddItemScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/personal-info': (context) => const PersonalInfoScreen(),
+        '/base': (context) => const BaseScreen(),
+        '/base-wishlist': (context) => const BaseScreen(initialIndex: 1),
+        '/base-profile': (context) => const BaseScreen(initialIndex: 2),
       },
     );
   }

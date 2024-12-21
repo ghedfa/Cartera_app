@@ -181,13 +181,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: 55,
                         child: ElevatedButton(
                           onPressed: () {
-                            // Navigate to HomeScreen and remove all previous routes
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                builder: (context) => const HomeScreen(),
-                              ),
-                              (Route<dynamic> route) => false,
-                            );
+                            // Your login logic here
+                            Navigator.pushReplacementNamed(context, '/base');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF7AA4FF),

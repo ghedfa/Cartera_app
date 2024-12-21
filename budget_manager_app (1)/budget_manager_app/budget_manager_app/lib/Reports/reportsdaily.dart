@@ -551,12 +551,12 @@ class _ReportsdailyScreenState extends State<ReportsdailyScreen> {
                             child:
                                 BlocBuilder<TransactionCubit, TransactionState>(
                               builder: (context, state) {
-                                // Access the Cubit and get the transactions
-                                final transactions = context
-                                    .read<TransactionCubit>()
-                                    .getTopTransactions();
+                                // Access the transactions directly from state
+                                final transactions = state.transactions
+                                    .take(3)
+                                    .toList(); // Or any filter logic you need
 
-                                // Call your function to build the list with the transactions from the Cubit
+                                // Call your function to build the list with the transactions from the state
                                 return _buildTransactionsList(
                                     transactions); // Pass transactions to your list builder
                               },
@@ -604,7 +604,9 @@ class _ReportsdailyScreenState extends State<ReportsdailyScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: transactions.length,
+              itemCount: transactions.length < 3
+                  ? transactions.length
+                  : 3, // Limit to first 3 items
               itemBuilder: (context, index) {
                 final transaction = transactions[index];
                 return Padding(

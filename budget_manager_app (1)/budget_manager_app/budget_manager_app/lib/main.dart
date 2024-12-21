@@ -8,7 +8,7 @@ import 'signup_screen.dart';
 import 'password_success_screen.dart';
 import 'profile_screen.dart';
 import 'personal_info_screen.dart';
-import 'home_screen.dart';
+import 'welcome.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: const LoginScreen(),
+      home: const Welcome2Screen(),
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),
@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
         '/add-item': (context) => const AddItemScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/personal-info': (context) => const PersonalInfoScreen(),
+        '/welcome': (context) => const Welcome2Screen(),
       },
     );
   }

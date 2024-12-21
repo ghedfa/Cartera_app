@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'personal_info_screen.dart';
 import 'settings_screen.dart';
 import 'package:budget_manager_app/widgets/rate_app_dialog.dart';
@@ -37,7 +36,8 @@ class ProfileScreen extends StatelessWidget {
                     child: Stack(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+                          icon: const Icon(Icons.notifications_outlined,
+                              color: Colors.white),
                           onPressed: () {},
                         ),
                         Positioned(
@@ -94,7 +94,8 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             child: const CircleAvatar(
                               backgroundColor: Colors.white,
-                              child: Icon(Icons.person, size: 50, color: Color(0xFF4B7BE5)),
+                              child: Icon(Icons.person,
+                                  size: 50, color: Color(0xFF4B7BE5)),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -132,12 +133,16 @@ class ProfileScreen extends StatelessWidget {
                                   gradient: const LinearGradient(
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
-                                    colors: [Color(0xFF4B7BE5), Color(0xFF3461C7)],
+                                    colors: [
+                                      Color(0xFF4B7BE5),
+                                      Color(0xFF3461C7)
+                                    ],
                                   ),
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF4B7BE5).withOpacity(0.3),
+                                      color: const Color(0xFF4B7BE5)
+                                          .withOpacity(0.3),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     ),
@@ -155,8 +160,10 @@ class ProfileScreen extends StatelessWidget {
                                           Container(
                                             padding: const EdgeInsets.all(12),
                                             decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(0.2),
-                                              borderRadius: BorderRadius.circular(15),
+                                              color:
+                                                  Colors.white.withOpacity(0.2),
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
                                             ),
                                             child: const Icon(
                                               Icons.workspace_premium,
@@ -167,7 +174,8 @@ class ProfileScreen extends StatelessWidget {
                                           const SizedBox(width: 15),
                                           Expanded(
                                             child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Row(
                                                   children: [
@@ -176,25 +184,31 @@ class ProfileScreen extends StatelessWidget {
                                                       style: TextStyle(
                                                         color: Colors.white,
                                                         fontSize: 18,
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
                                                     ),
                                                     const SizedBox(width: 8),
                                                     Container(
-                                                      padding: const EdgeInsets.symmetric(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
                                                         horizontal: 8,
                                                         vertical: 4,
                                                       ),
                                                       decoration: BoxDecoration(
-                                                        color: Colors.white.withOpacity(0.2),
-                                                        borderRadius: BorderRadius.circular(20),
+                                                        color: Colors.white
+                                                            .withOpacity(0.2),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
                                                       ),
                                                       child: const Text(
                                                         'PRO',
                                                         style: TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 12,
-                                                          fontWeight: FontWeight.w600,
+                                                          fontWeight:
+                                                              FontWeight.w600,
                                                         ),
                                                       ),
                                                     ),
@@ -233,7 +247,8 @@ class ProfileScreen extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const PersonalInfoScreen(),
+                                      builder: (context) =>
+                                          const PersonalInfoScreen(),
                                     ),
                                   );
                                 },
@@ -249,7 +264,8 @@ class ProfileScreen extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const SettingsScreen(),
+                                      builder: (context) =>
+                                          const SettingsScreen(),
                                     ),
                                   );
                                 },
@@ -280,7 +296,8 @@ class ProfileScreen extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const HelpCenterScreen(),
+                                      builder: (context) =>
+                                          const HelpCenterScreen(),
                                     ),
                                   );
                                 },
@@ -425,7 +442,8 @@ class ProfileScreen extends StatelessWidget {
                   if (showBadge)
                     Container(
                       margin: const EdgeInsets.only(right: 12),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFF5757),
                         borderRadius: BorderRadius.circular(20),

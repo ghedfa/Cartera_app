@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
-import 'widgets/custom_app_bar.dart';
-import 'widgets/custom_top_bar.dart';
 
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});

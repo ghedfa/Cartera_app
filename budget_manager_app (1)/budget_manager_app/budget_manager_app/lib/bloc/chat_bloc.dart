@@ -23,7 +23,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         text: event.message,
         isUser: true,
       ));
-      
+
       // Emit loading state with typing indicator
       emit(ChatLoading(messages: List.from(_messages)));
 
@@ -37,7 +37,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         text: response?.output ?? 'No response',
         isUser: false,
       ));
-      
+
       // Emit loaded state without typing indicator
       emit(ChatLoaded(messages: List.from(_messages)));
     } catch (e) {

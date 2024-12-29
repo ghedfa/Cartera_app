@@ -93,11 +93,11 @@ class _WalletScreenState extends State<WalletScreen> {
             children: [
               TextField(
                 controller: titleController,
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: const InputDecoration(labelText: 'Title'),
               ),
               TextField(
                 controller: amountController,
-                decoration: InputDecoration(labelText: 'Amount'),
+                decoration: const InputDecoration(labelText: 'Amount'),
                 keyboardType: TextInputType.number,
               ),
             ],
@@ -105,7 +105,7 @@ class _WalletScreenState extends State<WalletScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -123,7 +123,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 });
                 Navigator.pop(context);
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         );
@@ -146,11 +146,11 @@ class _WalletScreenState extends State<WalletScreen> {
             children: [
               TextField(
                 controller: titleController,
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: const InputDecoration(labelText: 'Title'),
               ),
               TextField(
                 controller: amountController,
-                decoration: InputDecoration(labelText: 'Amount'),
+                decoration: const InputDecoration(labelText: 'Amount'),
                 keyboardType: TextInputType.number,
               ),
             ],
@@ -158,7 +158,7 @@ class _WalletScreenState extends State<WalletScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -180,7 +180,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 });
                 Navigator.pop(context);
               },
-              child: Text('Add'),
+              child: const Text('Add'),
             ),
           ],
         );
@@ -216,7 +216,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           horizontal: 20.0, vertical: 20.0),
                       child: Column(
                         children: [
-                          Text(
+                          const Text(
                             'Total Balance',
                             style: TextStyle(
                               color: Colors.grey,
@@ -225,7 +225,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           ),
                           Text(
                             '\$${totalBalance.toStringAsFixed(2)}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.black,
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
@@ -316,7 +316,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             'History',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -326,7 +326,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.add, color: Colors.blue),
+                                icon: const Icon(Icons.add, color: Colors.blue),
                                 onPressed: addItem,
                               ),
                               IconButton(
@@ -375,15 +375,15 @@ class _WalletScreenState extends State<WalletScreen> {
             children: [
               Text(
                 item['title'],
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 item['date'],
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.grey,
                   fontSize: 12,
                 ),
@@ -402,11 +402,11 @@ class _WalletScreenState extends State<WalletScreen> {
               ),
               if (isModifyMode) ...[
                 IconButton(
-                  icon: Icon(Icons.edit, color: Colors.blue),
+                  icon: const Icon(Icons.edit, color: Colors.blue),
                   onPressed: () => editItem(index),
                 ),
                 IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
+                  icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () => deleteItem(index),
                 ),
               ]

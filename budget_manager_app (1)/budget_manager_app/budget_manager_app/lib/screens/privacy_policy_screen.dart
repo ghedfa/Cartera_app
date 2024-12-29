@@ -31,7 +31,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Content
             Expanded(
               child: Container(
@@ -42,7 +42,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: SingleChildScrollView(
+                child: const SingleChildScrollView(
                   child: Text(
                     'At Cartera, We Value Your Privacy And Are Committed To '
                     'Protecting Your Personal Information. This Privacy Policy '
@@ -69,7 +69,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             // Close button
             Padding(
               padding: const EdgeInsets.all(16.0),

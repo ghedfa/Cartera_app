@@ -18,14 +18,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
   Color selectedColor = const Color(0xFF7AA4FF);
 
   final List<Map<String, dynamic>> iconOptions = [
-    {'icon': Icons.shopping_bag_outlined, 'color': Color(0xFF7AA4FF)},
-    {'icon': Icons.flight_takeoff, 'color': Color(0xFFFF7AA4)},
-    {'icon': Icons.phone_iphone, 'color': Color(0xFF98FB98)},
-    {'icon': Icons.coffee_maker, 'color': Color(0xFFFFA07A)},
-    {'icon': Icons.book, 'color': Color(0xFFDDA0DD)},
-    {'icon': Icons.laptop_mac, 'color': Color(0xFF20B2AA)},
-    {'icon': Icons.directions_car, 'color': Color(0xFFFFB6C1)},
-    {'icon': Icons.home, 'color': Color(0xFFFFD700)},
+    {'icon': Icons.shopping_bag_outlined, 'color': const Color(0xFF7AA4FF)},
+    {'icon': Icons.flight_takeoff, 'color': const Color(0xFFFF7AA4)},
+    {'icon': Icons.phone_iphone, 'color': const Color(0xFF98FB98)},
+    {'icon': Icons.coffee_maker, 'color': const Color(0xFFFFA07A)},
+    {'icon': Icons.book, 'color': const Color(0xFFDDA0DD)},
+    {'icon': Icons.laptop_mac, 'color': const Color(0xFF20B2AA)},
+    {'icon': Icons.directions_car, 'color': const Color(0xFFFFB6C1)},
+    {'icon': Icons.home, 'color': const Color(0xFFFFD700)},
   ];
 
   @override
@@ -43,7 +43,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
           children: [
             // Simple Top Bar with Back Button
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
               child: Row(
                 children: [
                   IconButton(
@@ -78,7 +79,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-                      
+
                       // Icon Selection
                       Text(
                         'Choose Icon',
@@ -146,7 +147,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                           );
                           if (picked != null) {
                             setState(() {
-                              _dateController.text = 
+                              _dateController.text =
                                   DateFormat('MMMM dd, yyyy').format(picked);
                             });
                           }

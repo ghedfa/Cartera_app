@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "424852080336",
+    "firebase_url": "https://cartera-app-7b7d8-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "cartera-app-7b7d8",
+    "storage_bucket": "cartera-app-7b7d8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:424852080336:android:b2b7a974dff8a414d480d5",
+        "android_client_info": {
+          "package_name": "com.example.budget_manager_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW9wVyhLgxbOuyMuwtglMiVFkgaEo_cJk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

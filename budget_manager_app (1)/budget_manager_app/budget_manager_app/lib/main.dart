@@ -12,8 +12,13 @@ import 'password_success_screen.dart';
 import 'profile_screen.dart';
 import 'personal_info_screen.dart';
 import 'welcome.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   Bloc.observer = SimpleBlocObserver(); // Monitor state changes (Optional)
   runApp(const MyApp());
 }

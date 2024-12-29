@@ -11,6 +11,8 @@ import '/notifications.dart';
 const apiKey = 'AIzaSyAcCgC8nhq52Yg4js_cN3Co5eE7blp8QuQ';
 
 class GeminiChatScreen extends StatefulWidget {
+  const GeminiChatScreen({super.key});
+
   @override
   _GeminiChatScreenState createState() => _GeminiChatScreenState();
 }
@@ -41,18 +43,19 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
 
   Widget _buildMessageBubble(ChatMessage message) {
     return Row(
-      mainAxisAlignment: message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+      mainAxisAlignment:
+          message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (!message.isUser) ...[
           Container(
-            margin: EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: const BoxDecoration(
               color: Color(0xFF3A72E8),
               shape: BoxShape.circle,
             ),
-            padding: EdgeInsets.all(8),
-            child: Icon(
+            padding: const EdgeInsets.all(8),
+            child: const Icon(
               IconData(0xe0ab, fontFamily: 'MaterialIcons'),
               color: Colors.white,
               size: 20,
@@ -61,21 +64,25 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
         ],
         Flexible(
           child: Container(
-            margin: EdgeInsets.symmetric(vertical: 8),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: message.isUser ? Color(0xFF3A72E8) : Colors.white,
+              color: message.isUser ? const Color(0xFF3A72E8) : Colors.white,
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-                bottomLeft: message.isUser ? Radius.circular(16) : Radius.circular(4),
-                bottomRight: message.isUser ? Radius.circular(4) : Radius.circular(16),
+                topLeft: const Radius.circular(16),
+                topRight: const Radius.circular(16),
+                bottomLeft: message.isUser
+                    ? const Radius.circular(16)
+                    : const Radius.circular(4),
+                bottomRight: message.isUser
+                    ? const Radius.circular(4)
+                    : const Radius.circular(16),
               ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
                   blurRadius: 5,
-                  offset: Offset(0, 2),
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
@@ -90,13 +97,13 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
         ),
         if (message.isUser) ...[
           Container(
-            margin: EdgeInsets.only(left: 8),
-            decoration: BoxDecoration(
+            margin: const EdgeInsets.only(left: 8),
+            decoration: const BoxDecoration(
               color: Color(0xFF3A72E8),
               shape: BoxShape.circle,
             ),
-            padding: EdgeInsets.all(8),
-            child: Icon(
+            padding: const EdgeInsets.all(8),
+            child: const Icon(
               Icons.person_outline,
               color: Colors.white,
               size: 20,
@@ -113,13 +120,13 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          margin: EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
+          margin: const EdgeInsets.only(right: 8),
+          decoration: const BoxDecoration(
             color: Color(0xFF3A72E8),
             shape: BoxShape.circle,
           ),
-          padding: EdgeInsets.all(8),
-          child: Icon(
+          padding: const EdgeInsets.all(8),
+          child: const Icon(
             IconData(0xe0ab, fontFamily: 'MaterialIcons'),
             color: Colors.white,
             size: 20,
@@ -140,37 +147,43 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
             Positioned.fill(
               top: MediaQuery.of(context).size.height * 0.2,
               child: Container(
-                color: Color(0x00000052C0cc),
+                color: const Color(0x0052c0cc),
                 child: BlocBuilder<ChatBloc, ChatState>(
                   builder: (context, state) {
                     if (state is ChatInitial) {
-                      return Center(child: Text('Start a conversation!'));
+                      return const Center(child: Text('Start a conversation!'));
                     }
-                    
+
                     if (state is ChatError) {
                       return Center(child: Text(state.error));
                     }
-                    
-                    final messages = state is ChatLoaded ? state.messages : 
-                                   state is ChatLoading ? state.messages : [];
+
+                    final messages = state is ChatLoaded
+                        ? state.messages
+                        : state is ChatLoading
+                            ? state.messages
+                            : [];
                     final isTyping = state is ChatLoading;
-                    
+
                     return Column(
                       children: [
                         Expanded(
                           child: ListView.builder(
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                             itemCount: messages.length + (isTyping ? 1 : 0),
                             itemBuilder: (context, index) {
                               if (index == messages.length && isTyping) {
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
                                   child: _buildTypingIndicator(),
                                 );
                               }
-                              
+
                               return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
                                 child: _buildMessageBubble(messages[index]),
                               );
                             },
@@ -187,8 +200,9 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
               clipper: WaveClipper(),
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.27,
-                padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                decoration: BoxDecoration(
+                padding:
+                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
                       Color(0xFF5A92F5),
@@ -204,12 +218,12 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
-                      Expanded(
+                      const Expanded(
                         child: Text(
                           'AI Assistant',
                           textAlign: TextAlign.center,
@@ -221,7 +235,8 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.notifications, color: Colors.white),
+                        icon: const Icon(Icons.notifications,
+                            color: Colors.white),
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -250,26 +265,26 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
                         decoration: InputDecoration(
                           hintText: 'Message AI Assistant...',
                           filled: true,
-                          fillColor: Color(0xFFF2F3F5),
+                          fillColor: const Color(0xFFF2F3F5),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(24),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 12,
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     BlocBuilder<ChatBloc, ChatState>(
                       builder: (context, state) {
                         return FloatingActionButton(
-                          backgroundColor: Color(0xFF3A72E8),
+                          backgroundColor: const Color(0xFF3A72E8),
                           onPressed: state is ChatLoading ? null : _sendMessage,
                           child: state is ChatLoading
-                              ? SizedBox(
+                              ? const SizedBox(
                                   width: 24,
                                   height: 24,
                                   child: CircularProgressIndicator(
@@ -277,7 +292,7 @@ class _GeminiChatScreenState extends State<GeminiChatScreen> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : Icon(Icons.send, color: Colors.white),
+                              : const Icon(Icons.send, color: Colors.white),
                         );
                       },
                     ),
@@ -297,7 +312,7 @@ class WaveClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     var path = Path();
     path.lineTo(0, size.height - 40);
-    
+
     var firstControlPoint = Offset(size.width / 4, size.height);
     var firstEndPoint = Offset(size.width / 2.25, size.height - 30);
     path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,

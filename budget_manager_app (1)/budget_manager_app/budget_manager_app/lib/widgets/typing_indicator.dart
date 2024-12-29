@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class TypingIndicator extends StatefulWidget {
+  const TypingIndicator({super.key});
+
   @override
   _TypingIndicatorState createState() => _TypingIndicatorState();
 }
@@ -8,14 +10,14 @@ class TypingIndicator extends StatefulWidget {
 class _TypingIndicatorState extends State<TypingIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  List<double> _dotPositions = [0.0, 0.0, 0.0];
+  final List<double> _dotPositions = [0.0, 0.0, 0.0];
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1500),
     )..repeat();
 
     _controller.addListener(() {
@@ -47,9 +49,9 @@ class _TypingIndicatorState extends State<TypingIndicator>
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      margin: EdgeInsets.only(left: 16, right: 16, bottom: 8),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+      decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(16),
@@ -62,13 +64,13 @@ class _TypingIndicatorState extends State<TypingIndicator>
         mainAxisSize: MainAxisSize.min,
         children: List.generate(3, (index) {
           return Padding(
-            padding: EdgeInsets.only(right: 4),
+            padding: const EdgeInsets.only(right: 4),
             child: Transform.translate(
               offset: Offset(0, -_dotPositions[index]),
               child: Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFF3A72E8),
                   shape: BoxShape.circle,
                 ),

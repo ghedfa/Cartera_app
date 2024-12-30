@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:math';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -14,18 +13,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
   String _errorMessage = '';
   String _successMessage = '';
-  String? _generatedPin;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Function to generate a random 6-digit PIN
-  String _generatePin() {
-    final random = Random();
-    return (random.nextInt(900000) + 100000).toString();
-  }
-
-  // Function to check if the email exists in Firebase
-  Future<void> _checkEmail() async {
+  // Function to check if the email exists and send the reset link
+  Future<void> _sendResetEmail() async {
     String email = _emailController.text.trim();
     setState(() {
       _errorMessage = '';
@@ -40,36 +32,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
 
     try {
-      // Fetch sign-in methods for the entered email
-      final signInMethods = await _auth.fetchSignInMethodsForEmail(email);
-      if (signInMethods.isEmpty) {
-        setState(() {
-          _errorMessage = 'This email is not linked to any account.';
-        });
-      } else {
-        setState(() {
-          _errorMessage = '';
-          _successMessage = 'We have sent a PIN to your email.';
-          _generatedPin = _generatePin();
-        });
+      // Send the password reset email using Firebase Authentication
+      await _auth.sendPasswordResetEmail(email: email);
 
-        // Simulate sending the PIN to the email
-        _sendPinEmail(email);
-      }
+      setState(() {
+        _successMessage = 'A password reset link has been sent to your email!';
+      });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Something went wrong. Please try again later.';
+        _errorMessage = 'An error occurred. Please try again later.';
       });
     }
   }
 
-  // Function to send the PIN to the email (simulated)
-  Future<void> _sendPinEmail(String email) async {
-    print("Sending PIN $_generatedPin to $email"); // Simulating sending PIN
-    await Future.delayed(const Duration(seconds: 2)); // Simulate delay
-
-    // Navigate to the SecurityPinScreen and pass the generated PIN
-    Navigator.pushNamed(context, '/security-pin', arguments: _generatedPin);
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
   }
 
   @override
@@ -130,7 +109,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
-                    'Enter your email address below to receive password reset instructions',
+                    'Enter your email address below to receive password reset instructions.',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
@@ -217,7 +196,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         width: double.infinity,
                         height: 55,
                         child: ElevatedButton(
-                          onPressed: _checkEmail,
+                          onPressed: _sendResetEmail,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF7AA4FF),
                             shape: RoundedRectangleBorder(

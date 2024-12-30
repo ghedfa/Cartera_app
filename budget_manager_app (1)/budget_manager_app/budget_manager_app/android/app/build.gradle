@@ -7,6 +7,12 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
 }
+buildscript {
+    dependencies {
+        // Add this if not already present
+        classpath 'com.google.gms:google-services:4.3.14'
+    }
+}
 
 android {
     namespace = "com.example.budget_manager_app"
@@ -45,3 +51,6 @@ android {
 flutter {
     source = "../.."
 }
+
+apply plugin: 'com.google.gms.google-services'
+

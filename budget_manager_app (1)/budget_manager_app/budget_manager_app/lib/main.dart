@@ -1,5 +1,3 @@
-// ignore_for_file: unused_import
-
 import 'package:budget_manager_app/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +7,6 @@ import 'wishlist_screen.dart';
 import 'add_item_screen.dart';
 import 'login_screen.dart';
 import 'forgot_password_screen.dart';
-import 'security_pin_screen.dart';
 import 'signup_screen.dart';
 import 'password_success_screen.dart';
 import 'profile_screen.dart';
@@ -18,6 +15,7 @@ import 'welcome.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'change_password_screen.dart'; // Add the new password change screen
 
 void main() async {
   await Firebase.initializeApp(
@@ -58,7 +56,6 @@ class AppRoutes {
     '/login': (context) => const LoginScreen(),
     '/signup': (context) => const SignUpScreen(),
     '/forgot-password': (context) => const ForgotPasswordScreen(),
-    '/security-pin': (context) => const SecurityPinScreen(),
     '/password-success': (context) => const PasswordSuccessScreen(),
     '/base': (context) => const BaseScreen(),
     '/base-wishlist': (context) => const BaseScreen(initialIndex: 1),
@@ -68,6 +65,8 @@ class AppRoutes {
     '/profile': (context) => const ProfileScreen(),
     '/personal-info': (context) => const PersonalInfoScreen(),
     '/home': (context) => const BaseScreen(),
+    '/change-password': (context) =>
+        const ChangePasswordScreen(), // New route for password change
   };
 }
 

@@ -14,6 +14,9 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  bool _isPasswordVisible =
+      false; // Add this variable to track password visibility
+  bool _isConfirmPasswordVisible = false; // For confirm password
   // Controllers for the input fields
   TextEditingController fullNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -312,7 +315,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
           child: TextField(
             controller: controller,
-            obscureText: isPassword,
+            obscureText: isPassword
+                ? !_isPasswordVisible // Toggle visibility for password field
+                : !_isConfirmPasswordVisible, // Toggle visibility for confirm password
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.poppins(
@@ -325,15 +330,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 vertical: 12,
               ),
               suffixIcon: isPassword
-                  ? const Padding(
-                      padding: EdgeInsets.only(right: 8.0),
-                      child: Icon(
-                        Icons.visibility_off_outlined,
+                  ? IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                         color: Colors.black38,
-                        size: 20,
                       ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible =
+                              !_isPasswordVisible; // Toggle password visibility
+                        });
+                      },
                     )
-                  : null,
+                  : (isPassword == false)
+                      ? IconButton(
+                          icon: Icon(
+                            _isConfirmPasswordVisible
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: Colors.black38,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isConfirmPasswordVisible =
+                                  !_isConfirmPasswordVisible; // Toggle confirm password visibility
+                            });
+                          },
+                        )
+                      : null,
             ),
           ),
         ),

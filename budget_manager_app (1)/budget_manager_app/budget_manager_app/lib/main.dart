@@ -67,7 +67,7 @@ class AppRoutes {
     '/add-item': (context) => const AddItemScreen(),
     '/profile': (context) => const ProfileScreen(),
     '/personal-info': (context) => const PersonalInfoScreen(),
-    '/home': (context) => const WalletScreen(),
+    '/home': (context) => const BaseScreen(),
   };
 }
 

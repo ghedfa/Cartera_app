@@ -17,6 +17,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isPasswordVisible = false; // For password visibility
   bool _isConfirmPasswordVisible = false; // For confirm password visibility
   bool _isAccepted = false; // To track if the terms are accepted
+
   // Controllers for the input fields
   TextEditingController fullNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -147,22 +148,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Checkbox(
-                              value: _isAccepted,
-                              onChanged: (value) {
-                                setState(() {
-                                  _isAccepted = value ?? false;
-                                });
-                              },
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
+                          Checkbox(
+                            value: _isAccepted,
+                            onChanged: (value) {
+                              setState(() {
+                                _isAccepted = value ?? false;
+                              });
+                            },
                           ),
-                          const SizedBox(width: 8),
                           Expanded(
                             child: RichText(
                               text: TextSpan(
@@ -234,9 +227,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _isAccepted
-                              ? signUp
-                              : null, // Disable if not accepted
+                          onPressed: _isAccepted ? signUp : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF7AA4FF),
                             shape: RoundedRectangleBorder(
@@ -320,8 +311,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
           child: TextField(
             controller: controller,
-            obscureText:
-                isPassword ? !_isPasswordVisible : !_isConfirmPasswordVisible,
+            obscureText: isPassword
+                ? (label == 'Password'
+                    ? !_isPasswordVisible
+                    : !_isConfirmPasswordVisible)
+                : false,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.poppins(
@@ -336,32 +330,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
-                        _isPasswordVisible
+                        (label == 'Password'
+                                ? _isPasswordVisible
+                                : _isConfirmPasswordVisible)
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
                         color: Colors.black38,
                       ),
                       onPressed: () {
                         setState(() {
-                          _isPasswordVisible =
-                              !_isPasswordVisible; // Toggle password visibility
+                          if (label == 'Password') {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          } else {
+                            _isConfirmPasswordVisible =
+                                !_isConfirmPasswordVisible;
+                          }
                         });
                       },
                     )
-                  : IconButton(
-                      icon: Icon(
-                        _isConfirmPasswordVisible
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: Colors.black38,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isConfirmPasswordVisible =
-                              !_isConfirmPasswordVisible; // Toggle confirm password visibility
-                        });
-                      },
-                    ),
+                  : null,
             ),
           ),
         ),
@@ -370,139 +357,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // Gender Dropdown
-  Widget _buildGenderDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Gender',
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: Colors.black54,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFEDF2FF),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: DropdownButton<String>(
-            value: selectedGender,
-            onChanged: (String? newValue) {
-              setState(() {
-                selectedGender = newValue!;
-              });
-            },
-            items: <String>['Male', 'Female']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(
-                  value,
-                  style: GoogleFonts.poppins(fontSize: 14),
-                ),
-              );
-            }).toList(),
-            isExpanded: true,
-            underline: Container(),
-            hint: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Select Gender',
-                style: GoogleFonts.poppins(fontSize: 14, color: Colors.black38),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  // Currency Dropdown
-  Widget _buildCurrencyDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Currency',
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: Colors.black54,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFEDF2FF),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: DropdownButton<String>(
-            value: selectedCurrency,
-            onChanged: (String? newValue) {
-              setState(() {
-                selectedCurrency = newValue!;
-              });
-            },
-            items: <String>['USD', 'DZ', 'EUR']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(
-                  value,
-                  style: GoogleFonts.poppins(fontSize: 14),
-                ),
-              );
-            }).toList(),
-            isExpanded: true,
-            underline: Container(),
-            hint: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Select Currency',
-                style: GoogleFonts.poppins(fontSize: 14, color: Colors.black38),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  // Date of Birth Field
   Widget _buildDateOfBirthField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Date of Birth',
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: Colors.black54,
-          ),
-        ),
-        const SizedBox(height: 8),
-        GestureDetector(
-          onTap: _pickDateOfBirth, // Pick the date when tapped
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEDF2FF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              selectedDateOfBirth != null
-                  ? '${selectedDateOfBirth!.day}/${selectedDateOfBirth!.month}/${selectedDateOfBirth!.year}'
-                  : 'Select Date',
-              style: GoogleFonts.poppins(fontSize: 14, color: Colors.black38),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
+    return GestureDetector(
+      onTap: _pickDateOfBirth,
+      child: AbsorbPointer(
+        child: _buildInputField(
+            'Date of Birth',
+            selectedDateOfBirth == null
+                ? 'Select Date'
+                : selectedDateOfBirth!.toLocal().toString().split(' ')[0]),
+      ),
     );
+  }
+
+  Widget _buildGenderDropdown() {
+    return _buildInputField('Gender', selectedGender,
+        controller: TextEditingController(text: selectedGender));
+  }
+
+  Widget _buildCurrencyDropdown() {
+    return _buildInputField('Currency', selectedCurrency,
+        controller: TextEditingController(text: selectedCurrency));
   }
 }

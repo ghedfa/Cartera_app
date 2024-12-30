@@ -12,6 +12,7 @@ class SecurityPinScreen extends StatefulWidget {
 class _SecurityPinScreenState extends State<SecurityPinScreen> {
   final List<String> _pin = List.filled(6, '');
   int _currentIndex = 0;
+  String? _errorMessage;
 
   void _addNumber(String number) {
     if (_currentIndex < 6) {
@@ -31,8 +32,28 @@ class _SecurityPinScreenState extends State<SecurityPinScreen> {
     }
   }
 
+  void _validatePin(String generatedPin) {
+    final enteredPin = _pin.join('');
+    if (enteredPin == generatedPin) {
+      setState(() {
+        _errorMessage = null;
+      });
+      Navigator.pushNamed(context, '/password-success');
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      });
+    } else {
+      setState(() {
+        _errorMessage = 'Invalid PIN. Please try again.';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final String? generatedPin =
+        ModalRoute.of(context)?.settings.arguments as String?;
+
     return Scaffold(
       backgroundColor: const Color(0xFF7AA4FF),
       body: SafeArea(
@@ -87,19 +108,27 @@ class _SecurityPinScreenState extends State<SecurityPinScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 20),
+                      if (_errorMessage != null)
+                        Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
+                        ),
                       const SizedBox(height: 30),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/password-success');
-                            Future.delayed(const Duration(seconds: 2), () {
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                '/',
-                                (route) => false,
-                              );
-                            });
+                            if (generatedPin != null) {
+                              _validatePin(generatedPin);
+                            } else {
+                              setState(() {
+                                _errorMessage = 'PIN validation failed.';
+                              });
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF7AA4FF),
@@ -129,7 +158,7 @@ class _SecurityPinScreenState extends State<SecurityPinScreen> {
                           });
                         },
                         child: Text(
-                          'Send Again',
+                          'Clear PIN',
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             color: const Color(0xFF7AA4FF),

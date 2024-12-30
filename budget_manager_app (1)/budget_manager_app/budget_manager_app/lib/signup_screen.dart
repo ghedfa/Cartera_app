@@ -1,3 +1,4 @@
+import 'package:budget_manager_app/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
@@ -273,10 +274,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.pushNamedAndRemoveUntil(
+                              Navigator.push(
                                 context,
-                                '/',
-                                (route) => false,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
                               );
                             },
                             style: TextButton.styleFrom(

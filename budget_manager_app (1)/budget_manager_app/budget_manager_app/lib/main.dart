@@ -1,5 +1,6 @@
 // ignore_for_file: unused_import
 
+import 'package:budget_manager_app/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'cubit/transaction_cubit.dart';
@@ -66,6 +67,7 @@ class AppRoutes {
     '/add-item': (context) => const AddItemScreen(),
     '/profile': (context) => const ProfileScreen(),
     '/personal-info': (context) => const PersonalInfoScreen(),
+    '/home': (context) => const WalletScreen(),
   };
 }
 

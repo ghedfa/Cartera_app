@@ -1,32 +1,38 @@
-import 'package:budget_manager_app/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_screen.dart';
+import 'home_screen.dart';
+import 'package:budget_manager_app/home_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'cubit/transaction_cubit.dart';
 import 'base_screen.dart';
 import 'wishlist_screen.dart';
 import 'add_item_screen.dart';
-import 'login_screen.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 import 'password_success_screen.dart';
 import 'profile_screen.dart';
 import 'personal_info_screen.dart';
 import 'welcome.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'change_password_screen.dart'; // Add the new password change screen
+import 'change_password_screen.dart';
 
 void main() async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print('Failed to initialize Firebase: $e');
+  }
   Bloc.observer = SimpleBlocObserver(); // Monitor state changes (Optional)
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +43,26 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Budget Manager',
-        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.blue,
           scaffoldBackgroundColor: Colors.white,
         ),
-        initialRoute: '/welcome',
+        home: StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            
+            if (snapshot.hasData && snapshot.data != null) {
+              return const BaseScreen();
+            }
+            
+            return const Welcome2Screen();
+          },
+        ),
         routes: AppRoutes.routes,
+        debugShowCheckedModeBanner: false,
       ),
     );
   }

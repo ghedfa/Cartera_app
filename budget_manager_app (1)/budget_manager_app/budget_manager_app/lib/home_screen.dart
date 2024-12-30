@@ -1,199 +1,416 @@
-// ignore_for_file: unused_import, duplicate_import
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:budget_manager_app/Reports/reportmain.dart';
 import 'package:flutter/material.dart';
-import 'profile_screen.dart';
-import 'wishlist_screen.dart';
-import 'widgets/custom_top_bar.dart';
-import 'package:flutter/material.dart';
-import '../API/chatbot.dart'; // Import your chatbot page
-import 'notifications.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/transaction_service.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({Key? key}) : super(key: key);
 
   @override
-  _WalletScreenState createState() => _WalletScreenState();
+  State<WalletScreen> createState() => _WalletScreenState();
 }
 
 class _WalletScreenState extends State<WalletScreen> {
-  List<Map<String, dynamic>> expenses = [
-    {'title': 'Transportation', 'amount': 50.00, 'date': 'Today'},
-    {'title': 'Food', 'amount': 15.00, 'date': 'Yesterday'},
-  ];
-
-  List<Map<String, dynamic>> incomes = [
-    {'title': 'Salary', 'amount': 2000.00, 'date': 'Today'},
-    {'title': 'Freelance Work', 'amount': 500.00, 'date': 'Yesterday'},
-  ];
-
-  bool isExpenseMode = true; // Toggles between expenses and incomes
-  bool isModifyMode = false; // Toggles modify mode
-  double totalBalance = 0.0;
+  final TransactionService _transactionService = TransactionService();
+  bool isExpenseMode = true;
+  bool isModifyMode = false;
+  double balance = 0.0;
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> transactions = [];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    calculateBalance(); // Initial calculation of balance
+    _loadTransactions();
   }
 
-  // Calculate total income, expenses, and balance
-  void calculateBalance() {
-    double totalIncome =
-        incomes.fold(0, (sum, item) => sum + (item['amount'] as double));
-    double totalExpenses =
-        expenses.fold(0, (sum, item) => sum + (item['amount'] as double));
-    setState(() {
-      totalBalance = totalIncome - totalExpenses;
+  void _loadTransactions() {
+    _transactionService.getTransactions().listen((snapshot) {
+      setState(() {
+        transactions = snapshot.docs;
+        isLoading = false;
+        _updateBalance();
+      });
     });
   }
 
-  // Toggles between expense and income view
-  void toggleMode() {
+  void _updateBalance() async {
+    final balance = await _transactionService.getTotalBalance();
     setState(() {
-      isExpenseMode = !isExpenseMode;
+      this.balance = balance;
     });
   }
 
-  // Toggles modify mode
-  void toggleModifyMode() {
-    setState(() {
-      isModifyMode = !isModifyMode;
-    });
+  // Define expense categories with their icons and colors
+  final Map<String, Map<String, dynamic>> expenseCategories = {
+    'Food': {'icon': Icons.restaurant, 'color': const Color(0xFFFF7AA4)},
+    'Travel': {'icon': Icons.directions_car, 'color': const Color(0xFF7AA4FF)},
+    'Shopping': {'icon': Icons.shopping_bag, 'color': const Color(0xFFFFA07A)},
+    'Entertainment': {'icon': Icons.movie, 'color': const Color(0xFF98FB98)},
+    'Health': {'icon': Icons.medical_services, 'color': const Color(0xFFDDA0DD)},
+    'Education': {'icon': Icons.school, 'color': const Color(0xFF87CEEB)},
+    'Bills': {'icon': Icons.receipt_long, 'color': const Color(0xFFFFD700)},
+    'Others': {'icon': Icons.more_horiz, 'color': const Color(0xFFA9A9A9)},
+  };
+
+  // Define income categories with their icons and colors
+  final Map<String, Map<String, dynamic>> incomeCategories = {
+    'Salary': {'icon': Icons.work, 'color': const Color(0xFF4CAF50)},
+    'Freelance': {'icon': Icons.computer, 'color': const Color(0xFF7AA4FF)},
+    'Investment': {'icon': Icons.trending_up, 'color': const Color(0xFFFFD700)},
+    'Gift': {'icon': Icons.card_giftcard, 'color': const Color(0xFFFF7AA4)},
+    'Others': {'icon': Icons.more_horiz, 'color': const Color(0xFFA9A9A9)},
+  };
+
+  Map<String, dynamic>? getCategoryData(String category) {
+    final categories = isExpenseMode ? expenseCategories : incomeCategories;
+    return categories[category];
   }
 
-  // Deletes an item from the active list and updates the balance
-  void deleteItem(int index) {
-    setState(() {
-      if (isExpenseMode) {
-        expenses.removeAt(index);
-      } else {
-        incomes.removeAt(index);
-      }
-      calculateBalance(); // Recalculate balance
-    });
+  IconData getIconForCategory(String category) {
+    final categoryData = getCategoryData(category);
+    return categoryData?['icon'] as IconData? ?? Icons.more_horiz;
   }
 
-  // Edits an item in the active list and updates the balance
-  void editItem(int index) {
-    TextEditingController titleController = TextEditingController(
-        text:
-            isExpenseMode ? expenses[index]['title'] : incomes[index]['title']);
-    TextEditingController amountController = TextEditingController(
-        text: isExpenseMode
-            ? expenses[index]['amount'].toString()
-            : incomes[index]['amount'].toString());
+  Color getColorForCategory(String category) {
+    final categoryData = getCategoryData(category);
+    return categoryData?['color'] as Color? ?? const Color(0xFFA9A9A9);
+  }
+
+  void addItem() {
+    TextEditingController titleController = TextEditingController();
+    TextEditingController amountController = TextEditingController();
+    String selectedCategory = isExpenseMode ? 'Others' : 'Others';
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('Edit ${isExpenseMode ? 'Expense' : 'Income'}'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final categories = isExpenseMode ? expenseCategories : incomeCategories;
+            return AlertDialog(
+              title: Text('Add ${isExpenseMode ? 'Expense' : 'Income'}'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(labelText: 'Title'),
+                    ),
+                    TextField(
+                      controller: amountController,
+                      decoration: const InputDecoration(labelText: 'Amount'),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Category',
+                        style: TextStyle(color: Colors.grey, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: categories.entries.map<Widget>((entry) {
+                        final categoryData = entry.value;
+                        return _buildCategoryChip(
+                          entry.key,
+                          categoryData['icon'] as IconData,
+                          categoryData['color'] as Color,
+                          selectedCategory,
+                          (category) => setState(() => selectedCategory = category),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
               ),
-              TextField(
-                controller: amountController,
-                decoration: const InputDecoration(labelText: 'Amount'),
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  if (isExpenseMode) {
-                    expenses[index]['title'] = titleController.text;
-                    expenses[index]['amount'] =
-                        double.tryParse(amountController.text) ?? 0.0;
-                  } else {
-                    incomes[index]['title'] = titleController.text;
-                    incomes[index]['amount'] =
-                        double.tryParse(amountController.text) ?? 0.0;
-                  }
-                  calculateBalance(); // Recalculate balance
-                });
-                Navigator.pop(context);
-              },
-              child: const Text('Save'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (titleController.text.isNotEmpty &&
+                        amountController.text.isNotEmpty) {
+                      final newItem = {
+                        'title': titleController.text,
+                        'amount': double.tryParse(amountController.text) ?? 0.0,
+                        'category': selectedCategory,
+                        'isExpense': isExpenseMode,
+                      };
+                      await _transactionService.addTransaction(newItem);
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text('Add'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  // Adds a new item to the active list and updates the balance
-  void addItem() {
-    TextEditingController titleController = TextEditingController();
-    TextEditingController amountController = TextEditingController();
+  void editItem(String transactionId, Map<String, dynamic> item) {
+    TextEditingController titleController =
+        TextEditingController(text: item['title'] as String);
+    TextEditingController amountController =
+        TextEditingController(text: (item['amount'] as num).toString());
+    String selectedCategory = item['category'] as String? ?? 'Others';
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('Add ${isExpenseMode ? 'Expense' : 'Income'}'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final categories = isExpenseMode ? expenseCategories : incomeCategories;
+            return AlertDialog(
+              title: Text('Edit ${isExpenseMode ? 'Expense' : 'Income'}'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(labelText: 'Title'),
+                    ),
+                    TextField(
+                      controller: amountController,
+                      decoration: const InputDecoration(labelText: 'Amount'),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Category',
+                        style: TextStyle(color: Colors.grey, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: categories.entries.map<Widget>((entry) {
+                        final categoryData = entry.value;
+                        return _buildCategoryChip(
+                          entry.key,
+                          categoryData['icon'] as IconData,
+                          categoryData['color'] as Color,
+                          selectedCategory,
+                          (category) => setState(() => selectedCategory = category),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
               ),
-              TextField(
-                controller: amountController,
-                decoration: const InputDecoration(labelText: 'Amount'),
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  if (isExpenseMode) {
-                    expenses.add({
-                      'title': titleController.text,
-                      'amount': double.tryParse(amountController.text) ?? 0.0,
-                      'date': 'Today',
-                    });
-                  } else {
-                    incomes.add({
-                      'title': titleController.text,
-                      'amount': double.tryParse(amountController.text) ?? 0.0,
-                      'date': 'Today',
-                    });
-                  }
-                  calculateBalance(); // Recalculate balance
-                });
-                Navigator.pop(context);
-              },
-              child: const Text('Add'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (titleController.text.isNotEmpty &&
+                        amountController.text.isNotEmpty) {
+                      final updatedItem = {
+                        'title': titleController.text,
+                        'amount': double.tryParse(amountController.text) ?? 0.0,
+                        'category': selectedCategory,
+                        'isExpense': isExpenseMode,
+                      };
+                      await _transactionService.updateTransaction(
+                          transactionId, updatedItem);
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
         );
       },
+    );
+  }
+
+  void deleteItem(String transactionId) async {
+    bool confirm = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Transaction'),
+        content: const Text('Are you sure you want to delete this transaction?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    ) ??
+        false;
+
+    if (confirm) {
+      await _transactionService.deleteTransaction(transactionId);
+    }
+  }
+
+  Widget _buildTransactionList() {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final filteredTransactions =
+        transactions.where((doc) => doc.data()['isExpense'] == isExpenseMode).toList();
+
+    if (filteredTransactions.isEmpty) {
+      return Center(
+        child: Text(
+          'No ${isExpenseMode ? 'expenses' : 'income'} yet',
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: filteredTransactions.length,
+      itemBuilder: (context, index) {
+        final doc = filteredTransactions[index];
+        final item = doc.data();
+        return _buildTransactionItem(item, doc.id, isModifyMode);
+      },
+    );
+  }
+
+  Widget _buildTransactionItem(
+      Map<String, dynamic> item, String transactionId, bool isModifyMode) {
+    final category = item['category'] as String? ?? 'Others';
+    final categoryColor = getColorForCategory(category);
+    final categoryIcon = getIconForCategory(category);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: categoryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              categoryIcon,
+              color: categoryColor,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['title'] as String? ?? '',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  item['date'] as String? ?? 'Today',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '\$${(item['amount'] as num?)?.toStringAsFixed(2) ?? '0.00'}',
+                style: TextStyle(
+                  color: isExpenseMode ? Colors.red : Colors.green,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              if (isModifyMode)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, size: 18),
+                      color: Colors.blue,
+                      onPressed: () => editItem(transactionId, item),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, size: 18),
+                      color: Colors.red,
+                      onPressed: () => deleteItem(transactionId),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(
+    String category,
+    IconData icon,
+    Color color,
+    String selectedCategory,
+    Function(String) onSelect,
+  ) {
+    return GestureDetector(
+      onTap: () => onSelect(category),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: selectedCategory == category ? color : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: selectedCategory == category ? Colors.white : Colors.grey,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              category,
+              style: TextStyle(
+                color: selectedCategory == category ? Colors.white : Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> activeList = isExpenseMode ? expenses : incomes;
-
     return Scaffold(
       backgroundColor: const Color(0xFF4B7BE5),
       body: SafeArea(
@@ -226,7 +443,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             ),
                           ),
                           Text(
-                            '\$${totalBalance.toStringAsFixed(2)}',
+                            '\$${balance.toStringAsFixed(2)}',
                             style: const TextStyle(
                               color: Colors.black,
                               fontSize: 32,
@@ -252,7 +469,9 @@ class _WalletScreenState extends State<WalletScreen> {
                             Expanded(
                               child: GestureDetector(
                                 onTap: () {
-                                  if (!isExpenseMode) toggleMode();
+                                  setState(() {
+                                    isExpenseMode = true;
+                                  });
                                 },
                                 child: Container(
                                   height: 40,
@@ -281,7 +500,9 @@ class _WalletScreenState extends State<WalletScreen> {
                             Expanded(
                               child: GestureDetector(
                                 onTap: () {
-                                  if (isExpenseMode) toggleMode();
+                                  setState(() {
+                                    isExpenseMode = false;
+                                  });
                                 },
                                 child: Container(
                                   height: 40,
@@ -336,7 +557,11 @@ class _WalletScreenState extends State<WalletScreen> {
                                   isModifyMode ? Icons.check : Icons.edit,
                                   color: Colors.blue,
                                 ),
-                                onPressed: toggleModifyMode,
+                                onPressed: () {
+                                  setState(() {
+                                    isModifyMode = !isModifyMode;
+                                  });
+                                },
                               ),
                             ],
                           ),
@@ -346,14 +571,9 @@ class _WalletScreenState extends State<WalletScreen> {
 
                     // Transactions List
                     Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16.0),
-                        itemCount: activeList.length,
-                        itemBuilder: (context, index) {
-                          return _buildTransactionItem(
-                              activeList[index], index, isModifyMode);
-                        },
-                      ),
+                      child: isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : _buildTransactionList(),
                     ),
                   ],
                 ),
@@ -361,60 +581,6 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTransactionItem(
-      Map<String, dynamic> item, int index, bool isModifyMode) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item['title'],
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                item['date'],
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Text(
-                '\$${item['amount'].toStringAsFixed(2)}',
-                style: TextStyle(
-                  color: isExpenseMode ? Colors.red : Colors.green,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              if (isModifyMode) ...[
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () => editItem(index),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => deleteItem(index),
-                ),
-              ]
-            ],
-          ),
-        ],
       ),
     );
   }

@@ -14,9 +14,9 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  bool _isPasswordVisible =
-      false; // Add this variable to track password visibility
-  bool _isConfirmPasswordVisible = false; // For confirm password
+  bool _isPasswordVisible = false; // For password visibility
+  bool _isConfirmPasswordVisible = false; // For confirm password visibility
+  bool _isAccepted = false; // To track if the terms are accepted
   // Controllers for the input fields
   TextEditingController fullNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -151,8 +151,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             width: 20,
                             height: 20,
                             child: Checkbox(
-                              value: false,
-                              onChanged: (value) {},
+                              value: _isAccepted,
+                              onChanged: (value) {
+                                setState(() {
+                                  _isAccepted = value ?? false;
+                                });
+                              },
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4),
                               ),
@@ -230,8 +234,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed:
-                              signUp, // Calls the signUp method when pressed
+                          onPressed: _isAccepted
+                              ? signUp
+                              : null, // Disable if not accepted
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF7AA4FF),
                             shape: RoundedRectangleBorder(
@@ -315,9 +320,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
           child: TextField(
             controller: controller,
-            obscureText: isPassword
-                ? !_isPasswordVisible // Toggle visibility for password field
-                : !_isConfirmPasswordVisible, // Toggle visibility for confirm password
+            obscureText:
+                isPassword ? !_isPasswordVisible : !_isConfirmPasswordVisible,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.poppins(
@@ -344,22 +348,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         });
                       },
                     )
-                  : (isPassword == false)
-                      ? IconButton(
-                          icon: Icon(
-                            _isConfirmPasswordVisible
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            color: Colors.black38,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isConfirmPasswordVisible =
-                                  !_isConfirmPasswordVisible; // Toggle confirm password visibility
-                            });
-                          },
-                        )
-                      : null,
+                  : IconButton(
+                      icon: Icon(
+                        _isConfirmPasswordVisible
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: Colors.black38,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isConfirmPasswordVisible =
+                              !_isConfirmPasswordVisible; // Toggle confirm password visibility
+                        });
+                      },
+                    ),
             ),
           ),
         ),

@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import, duplicate_import
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:budget_manager_app/Reports/reportmain.dart';
 import 'package:flutter/material.dart';
 import 'profile_screen.dart';

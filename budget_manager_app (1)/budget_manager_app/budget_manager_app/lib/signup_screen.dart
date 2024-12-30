@@ -7,29 +7,77 @@ import 'screens/terms_screen.dart';
 import 'screens/privacy_policy_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+  const SignUpScreen({super.key});
 
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  // Controllers for text fields
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController fullNameController = TextEditingController();
-  final TextEditingController userNameController = TextEditingController();
+  // Controllers for the input fields
+  TextEditingController fullNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController userNameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+  DateTime? selectedDateOfBirth; // Handle the selected date for DOB
+  String selectedGender = ''; // Set gender
+  String selectedCurrency = ''; // Set currency
 
-  // Dropdown values
-  String selectedGender = 'Select Gender';
-  String selectedCurrency = 'Select Currency';
+  // Dispose controllers
+  @override
+  void dispose() {
+    fullNameController.dispose();
+    emailController.dispose();
+    userNameController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
-  // Date picker value
-  DateTime? selectedDateOfBirth;
+  Future<void> signUp() async {
+    if (passwordController.text != confirmPasswordController.text) {
+      // Show error if passwords don't match
+      print("Passwords do not match.");
+      return;
+    }
 
-  // Password visibility state
-  bool _isPasswordVisible = false;
-  bool _isAgreed = false;
+    try {
+      // Step 1: Create the user with email and password
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      // Step 2: Save the user data to Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'fullName': fullNameController.text.trim(),
+        'email': emailController.text.trim(),
+        'userName': userNameController.text.trim(),
+        'dateOfBirth': selectedDateOfBirth?.toIso8601String() ??
+            '', // Handle date formatting
+        'gender': selectedGender,
+        'currency': selectedCurrency,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      // Optional: Navigate to another screen (e.g., a welcome screen or home page)
+      Navigator.pushReplacementNamed(
+          context, '/home'); // Replace with the appropriate screen route
+
+      print("User signed up successfully!");
+    } catch (e) {
+      // Handle any errors (e.g., email already in use, weak password, etc.)
+      print("Error signing up: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error signing up: $e")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,19 +120,102 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       _buildInputField('User Name', 'example',
                           controller: userNameController),
                       _buildDropdownField('Date Of Birth'),
-                      _buildDropdownField('Gender'),
+                      _buildInputField('Gender', 'Select Gender',
+                          controller: TextEditingController()),
                       _buildDropdownField('Currency'),
                       _buildInputField('Password', '••••••••',
-                          controller: passwordController, isPassword: true),
+                          isPassword: true, controller: passwordController),
                       _buildInputField('Confirm Password', '••••••••',
-                          isPassword: true),
+                          isPassword: true,
+                          controller: confirmPasswordController),
                       const SizedBox(height: 20),
-                      _buildCheckbox(),
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(
+                              value: false,
+                              onChanged: (value) {},
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                text: 'By registering, you agree to ',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.black54,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: 'Terms of Use',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: const Color(0xFF7AA4FF),
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const TermsScreen(),
+                                          ),
+                                        );
+                                      },
+                                  ),
+                                  TextSpan(
+                                    text: ' and ',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'Privacy Policy',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: const Color(0xFF7AA4FF),
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const PrivacyPolicyScreen(),
+                                          ),
+                                        );
+                                      },
+                                  ),
+                                  TextSpan(
+                                    text: '.',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _signUp,
+                          onPressed:
+                              signUp, // Calls the signUp method when pressed
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF7AA4FF),
                             shape: RoundedRectangleBorder(
@@ -148,7 +279,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // Build a text field for user input
   Widget _buildInputField(String label, String hint,
       {bool isPassword = false, TextEditingController? controller}) {
     return Column(
@@ -168,8 +298,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: TextField(
-            obscureText: isPassword ? !_isPasswordVisible : false,
             controller: controller,
+            obscureText: isPassword,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.poppins(
@@ -177,22 +307,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 fontSize: 14,
               ),
               border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
               suffixIcon: isPassword
-                  ? IconButton(
-                      icon: Icon(
-                        _isPasswordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                  ? const Padding(
+                      padding: EdgeInsets.only(right: 8.0),
+                      child: Icon(
+                        Icons.visibility_off_outlined,
                         color: Colors.black38,
                         size: 20,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
                     )
                   : null,
             ),
@@ -203,7 +329,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // Build a dropdown field for selecting values
   Widget _buildDropdownField(String label) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,143 +346,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
             color: const Color(0xFFEDF2FF),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: DropdownButton<String>(
-            value: label == 'Gender' ? selectedGender : selectedCurrency,
-            onChanged: (String? newValue) {
-              setState(() {
-                if (label == 'Gender') {
-                  selectedGender = newValue!;
-                } else if (label == 'Currency') {
-                  selectedCurrency = newValue!;
-                }
-              });
-            },
-            items: <String>['Select', 'Option 1', 'Option 2', 'Option 3']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
+          child: TextField(
+            readOnly: true,
+            decoration: InputDecoration(
+              hintText: 'Select',
+              hintStyle: GoogleFonts.poppins(
+                color: Colors.black38,
+                fontSize: 14,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              suffixIcon: const Padding(
+                padding: EdgeInsets.only(right: 8.0),
+                child: Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Colors.black38,
+                  size: 20,
+                ),
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 16),
       ],
     );
-  }
-
-  // Build the checkbox for agreement
-  Widget _buildCheckbox() {
-    return Row(
-      children: [
-        Checkbox(
-          value: _isAgreed,
-          onChanged: (value) {
-            setState(() {
-              _isAgreed = value!;
-            });
-          },
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: RichText(
-            text: TextSpan(
-              text: 'By registering, you agree to ',
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                color: Colors.black54,
-              ),
-              children: [
-                TextSpan(
-                  text: 'Terms of Use',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: const Color(0xFF7AA4FF),
-                    fontWeight: FontWeight.w500,
-                    decoration: TextDecoration.underline,
-                  ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TermsScreen(),
-                        ),
-                      );
-                    },
-                ),
-                TextSpan(
-                  text: ' and ',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.black54,
-                  ),
-                ),
-                TextSpan(
-                  text: 'Privacy Policy',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: const Color(0xFF7AA4FF),
-                    fontWeight: FontWeight.w500,
-                    decoration: TextDecoration.underline,
-                  ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const PrivacyPolicyScreen(),
-                        ),
-                      );
-                    },
-                ),
-                TextSpan(
-                  text: '.',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Sign up logic
-  void _signUp() async {
-    if (_isAgreed) {
-      try {
-        // Step 1: Create user with Firebase Authentication
-        UserCredential userCredential =
-            await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        );
-
-        // Step 2: Save user details in Firestore
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .set({
-          'fullName': fullNameController.text.trim(),
-          'email': emailController.text.trim(),
-          'userName': userNameController.text.trim(),
-          'dateOfBirth': selectedDateOfBirth?.toIso8601String() ?? '',
-          'gender': selectedGender,
-          'currency': selectedCurrency,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-
-        // Show success message or navigate to another screen
-        print("User successfully registered!");
-      } catch (e) {
-        print("Error during sign-up: $e");
-      }
-    } else {
-      print("Please agree to the terms and conditions.");
-    }
   }
 }

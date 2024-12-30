@@ -21,8 +21,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   DateTime? selectedDateOfBirth; // Handle the selected date for DOB
-  String selectedGender = ''; // Set gender
-  String selectedCurrency = ''; // Set currency
+  String selectedGender = 'Male'; // Default gender
+  String selectedCurrency = 'USD'; // Default currency
 
   // Dispose controllers
   @override
@@ -58,8 +58,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'fullName': fullNameController.text.trim(),
         'email': emailController.text.trim(),
         'userName': userNameController.text.trim(),
-        'dateOfBirth': selectedDateOfBirth?.toIso8601String() ??
-            '', // Handle date formatting
+        'dateOfBirth': selectedDateOfBirth?.toIso8601String() ?? '',
         'gender': selectedGender,
         'currency': selectedCurrency,
         'createdAt': FieldValue.serverTimestamp(),
@@ -76,6 +75,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error signing up: $e")),
       );
+    }
+  }
+
+  // Function to pick date for Date of Birth
+  Future<void> _pickDateOfBirth() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDateOfBirth ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != selectedDateOfBirth) {
+      setState(() {
+        selectedDateOfBirth = picked;
+      });
     }
   }
 
@@ -119,10 +133,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           controller: emailController),
                       _buildInputField('User Name', 'example',
                           controller: userNameController),
-                      _buildDropdownField('Date Of Birth'),
-                      _buildInputField('Gender', 'Select Gender',
-                          controller: TextEditingController()),
-                      _buildDropdownField('Currency'),
+                      _buildDateOfBirthField(),
+                      _buildGenderDropdown(),
+                      _buildCurrencyDropdown(),
                       _buildInputField('Password', '••••••••',
                           isPassword: true, controller: passwordController),
                       _buildInputField('Confirm Password', '••••••••',
@@ -329,12 +342,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget _buildDropdownField(String label) {
+  // Gender Dropdown
+  Widget _buildGenderDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          'Gender',
           style: GoogleFonts.poppins(
             fontSize: 14,
             color: Colors.black54,
@@ -346,27 +360,116 @@ class _SignUpScreenState extends State<SignUpScreen> {
             color: const Color(0xFFEDF2FF),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: TextField(
-            readOnly: true,
-            decoration: InputDecoration(
-              hintText: 'Select',
-              hintStyle: GoogleFonts.poppins(
-                color: Colors.black38,
-                fontSize: 14,
-              ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              suffixIcon: const Padding(
-                padding: EdgeInsets.only(right: 8.0),
-                child: Icon(
-                  Icons.keyboard_arrow_down,
-                  color: Colors.black38,
-                  size: 20,
+          child: DropdownButton<String>(
+            value: selectedGender,
+            onChanged: (String? newValue) {
+              setState(() {
+                selectedGender = newValue!;
+              });
+            },
+            items: <String>['Male', 'Female']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(
+                  value,
+                  style: GoogleFonts.poppins(fontSize: 14),
                 ),
+              );
+            }).toList(),
+            isExpanded: true,
+            underline: Container(),
+            hint: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'Select Gender',
+                style: GoogleFonts.poppins(fontSize: 14, color: Colors.black38),
               ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  // Currency Dropdown
+  Widget _buildCurrencyDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Currency',
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.black54,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFEDF2FF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: DropdownButton<String>(
+            value: selectedCurrency,
+            onChanged: (String? newValue) {
+              setState(() {
+                selectedCurrency = newValue!;
+              });
+            },
+            items: <String>['USD', 'DZ', 'EUR']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(
+                  value,
+                  style: GoogleFonts.poppins(fontSize: 14),
+                ),
+              );
+            }).toList(),
+            isExpanded: true,
+            underline: Container(),
+            hint: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'Select Currency',
+                style: GoogleFonts.poppins(fontSize: 14, color: Colors.black38),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  // Date of Birth Field
+  Widget _buildDateOfBirthField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Date of Birth',
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.black54,
+          ),
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: _pickDateOfBirth, // Pick the date when tapped
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEDF2FF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              selectedDateOfBirth != null
+                  ? '${selectedDateOfBirth!.day}/${selectedDateOfBirth!.month}/${selectedDateOfBirth!.year}'
+                  : 'Select Date',
+              style: GoogleFonts.poppins(fontSize: 14, color: Colors.black38),
             ),
           ),
         ),

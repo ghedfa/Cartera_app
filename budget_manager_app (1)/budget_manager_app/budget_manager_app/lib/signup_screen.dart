@@ -25,8 +25,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   DateTime? selectedDateOfBirth; // Handle the selected date for DOB
-  String selectedGender = 'Male'; // Default gender
-  String selectedCurrency = 'USD'; // Default currency
+
+  // Default gender and currency
+  String selectedGender = 'Male';
+  String selectedCurrency = 'USD';
 
   // Dispose controllers
   @override
@@ -95,6 +97,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
         selectedDateOfBirth = picked;
       });
     }
+  }
+
+  // Check if all fields are filled
+  bool _isSignUpButtonEnabled() {
+    return fullNameController.text.isNotEmpty &&
+        emailController.text.isNotEmpty &&
+        userNameController.text.isNotEmpty &&
+        passwordController.text.isNotEmpty &&
+        confirmPasswordController.text.isNotEmpty &&
+        _isAccepted &&
+        selectedDateOfBirth != null;
   }
 
   @override
@@ -227,9 +240,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _isAccepted ? signUp : null,
+                          onPressed: _isSignUpButtonEnabled() ? signUp : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF7AA4FF),
+                            backgroundColor: _isSignUpButtonEnabled()
+                                ? const Color(0xFF7AA4FF)
+                                : Colors.grey,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -316,6 +331,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ? !_isPasswordVisible
                     : !_isConfirmPasswordVisible)
                 : false,
+            onChanged: (value) => setState(() {}),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.poppins(
@@ -371,12 +387,86 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _buildGenderDropdown() {
-    return _buildInputField('Gender', selectedGender,
-        controller: TextEditingController(text: selectedGender));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Gender',
+          style: GoogleFonts.poppins(fontSize: 14, color: Colors.black54),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFEDF2FF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: DropdownButtonFormField<String>(
+            value: selectedGender,
+            onChanged: (value) {
+              setState(() {
+                selectedGender = value!;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'Select Gender',
+              hintStyle:
+                  GoogleFonts.poppins(color: Colors.black38, fontSize: 14),
+              border: InputBorder.none,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            items: ['Male', 'Female']
+                .map((gender) => DropdownMenuItem<String>(
+                      value: gender,
+                      child: Text(gender),
+                    ))
+                .toList(),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
   }
 
   Widget _buildCurrencyDropdown() {
-    return _buildInputField('Currency', selectedCurrency,
-        controller: TextEditingController(text: selectedCurrency));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Currency',
+          style: GoogleFonts.poppins(fontSize: 14, color: Colors.black54),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFEDF2FF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: DropdownButtonFormField<String>(
+            value: selectedCurrency,
+            onChanged: (value) {
+              setState(() {
+                selectedCurrency = value!;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'Select Currency',
+              hintStyle:
+                  GoogleFonts.poppins(color: Colors.black38, fontSize: 14),
+              border: InputBorder.none,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            items: ['USD', 'EUR', 'DZ']
+                .map((currency) => DropdownMenuItem<String>(
+                      value: currency,
+                      child: Text(currency),
+                    ))
+                .toList(),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
   }
 }

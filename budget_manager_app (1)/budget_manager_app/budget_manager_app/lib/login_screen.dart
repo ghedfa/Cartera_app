@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,6 +14,54 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> _login() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showErrorDialog('Please fill in all fields');
+      return;
+    }
+
+    try {
+      // Sign in with email and password
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+
+      // Navigate to the next screen
+      Navigator.pushReplacementNamed(context, '/base');
+    } on FirebaseAuthException catch (e) {
+      // Handle authentication errors
+      String errorMessage = 'An error occurred';
+      if (e.code == 'user-not-found') {
+        errorMessage = 'No user found with this email';
+      } else if (e.code == 'wrong-password') {
+        errorMessage = 'Incorrect password';
+      }
+      _showErrorDialog(errorMessage);
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,10 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: double.infinity,
                         height: 55,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // Your login logic here
-                            Navigator.pushReplacementNamed(context, '/base');
-                          },
+                          onPressed: _login, // Call the login function
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF7AA4FF),
                             shape: RoundedRectangleBorder(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'services/wishlist_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AddItemScreen extends StatefulWidget {
   const AddItemScreen({super.key});
@@ -16,6 +18,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final TextEditingController _messageController = TextEditingController();
   IconData selectedIcon = Icons.shopping_bag_outlined;
   Color selectedColor = const Color(0xFF7AA4FF);
+  final WishlistService _wishlistService = WishlistService();
+  bool _isLoading = false;
 
   final List<Map<String, dynamic>> iconOptions = [
     {'icon': Icons.shopping_bag_outlined, 'color': const Color(0xFF7AA4FF)},
@@ -203,9 +207,74 @@ class _AddItemScreenState extends State<AddItemScreen> {
                         width: double.infinity,
                         height: 55,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // TODO: Implement save functionality
-                            Navigator.pop(context);
+                          onPressed: _isLoading ? null : () async {
+                            final user = FirebaseAuth.instance.currentUser;
+                            print('DEBUG: Current user attempting to save: ${user?.email}');
+                            
+                            if (user == null) {
+                              print('DEBUG: No user logged in when trying to save');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please login first'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              Navigator.of(context).pushReplacementNamed('/login');
+                              return;
+                            }
+
+                            if (_titleController.text.isEmpty || _amountController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please fill in all required fields'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+
+                            setState(() {
+                              _isLoading = true;
+                            });
+
+                            try {
+                              final amount = double.parse(_amountController.text.replaceAll('\$', ''));
+                              final date = DateFormat('MMMM dd, yyyy').parse(_dateController.text);
+
+                              await _wishlistService.addWishlistItem(
+                                title: _titleController.text,
+                                amount: amount,
+                                icon: selectedIcon.codePoint.toString(),
+                                iconColor: selectedColor.value.toRadixString(16),
+                                date: date,
+                                message: _messageController.text,
+                              );
+
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Item added successfully!'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                                Navigator.pop(context, true);
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error: ${e.toString()}'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            } finally {
+                              if (mounted) {
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                              }
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF7AA4FF),
@@ -213,14 +282,23 @@ class _AddItemScreenState extends State<AddItemScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: Text(
-                            'Save',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'Save',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 70),

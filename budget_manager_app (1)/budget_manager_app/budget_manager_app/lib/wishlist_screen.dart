@@ -1,9 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
+import 'services/wishlist_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
-class WishlistScreen extends StatelessWidget {
+class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
+
+  @override
+  State<WishlistScreen> createState() => _WishlistScreenState();
+}
+
+class _WishlistScreenState extends State<WishlistScreen> {
+  final WishlistService _wishlistService = WishlistService();
+  double totalSavings = 0.0;
+  bool _isLoading = true;
+  Map<String, List<QueryDocumentSnapshot<Map<String, dynamic>>>> groupedItems = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      // Listen to wishlist updates
+      _wishlistService.getWishlistItems().listen((snapshot) async {
+        final grouped = await _wishlistService.getWishlistItemsByMonth();
+        final total = await _wishlistService.getTotalSavingsGoal();
+        
+        if (mounted) {
+          setState(() {
+            groupedItems = grouped;
+            totalSavings = total;
+            _isLoading = false;
+          });
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading wishlist: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +115,7 @@ class WishlistScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$2,783.00',
+                    '\$${totalSavings.toStringAsFixed(2)}',
                     style: GoogleFonts.poppins(
                       fontSize: 28,
                       fontWeight: FontWeight.w600,
@@ -125,45 +174,68 @@ class WishlistScreen extends StatelessWidget {
                     topRight: Radius.circular(30),
                   ),
                 ),
-                child: ListView(
-                  children: [
-                    _buildMonthSection('April', [
-                      _buildWishlistItem(
-                        'Trip To Paris',
-                        4000.00,
-                        Icons.flight_takeoff,
-                        const Color(0xFFFF7AA4),
-                      ),
-                      _buildWishlistItem(
-                        'Smartphone',
-                        100.00,
-                        Icons.phone_iphone,
-                        const Color(0xFF7AA4FF),
-                      ),
-                      _buildWishlistItem(
-                        'Coffee Maker',
-                        150.00,
-                        Icons.coffee_maker,
-                        const Color(0xFFFFA07A),
-                      ),
-                      _buildWishlistItem(
-                        'Language Course',
-                        4.13,
-                        Icons.language,
-                        const Color(0xFF98FB98),
-                      ),
-                    ]),
-                    _buildMonthSection('March', [
-                      _buildWishlistItem(
-                        'Book Collection',
-                        70.40,
-                        Icons.book,
-                        const Color(0xFFDDA0DD),
-                      ),
-                    ]),
-                    const SizedBox(height: 70),
-                  ],
-                ),
+                child: _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : groupedItems.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.list_alt,
+                                  size: 64,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No items in your wishlist',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Tap + to add your first item',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: Colors.grey[400],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: groupedItems.length,
+                            itemBuilder: (context, index) {
+                              final monthYear = groupedItems.keys.elementAt(index);
+                              final items = groupedItems[monthYear]!;
+                              final date = DateTime(
+                                int.parse(monthYear.split('-')[1]),
+                                int.parse(monthYear.split('-')[0]),
+                              );
+                              
+                              return _buildMonthSection(
+                                DateFormat('MMMM yyyy').format(date),
+                                items.map((doc) {
+                                  final data = doc.data();
+                                  return _buildWishlistItem(
+                                    data['title'] as String,
+                                    (data['amount'] as num).toDouble(),
+                                    IconData(
+                                      int.parse(data['icon']),
+                                      fontFamily: 'MaterialIcons',
+                                    ),
+                                    Color(int.parse('0xFF${data['iconColor']}')),
+                                    data['progress'] as double? ?? 0.0,
+                                    doc.id,
+                                  );
+                                }).toList(),
+                              );
+                            },
+                          ),
               ),
             ),
           ],
@@ -235,70 +307,181 @@ class WishlistScreen extends StatelessWidget {
   }
 
   Widget _buildWishlistItem(
-      String name, double amount, IconData icon, Color iconColor) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(
-          color: const Color(0xFFEDF2FF),
+      String name, double amount, IconData icon, Color iconColor, double progress, String itemId) {
+    return Dismissible(
+      key: Key(itemId),
+      background: Container(
+        decoration: BoxDecoration(
+          color: Colors.red.shade100,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(
+          Icons.delete,
+          color: Colors.red,
         ),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  ),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Delete Item'),
+              content: const Text('Are you sure you want to delete this item?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
                 ),
-                const SizedBox(height: 4),
-                LinearProgressIndicator(
-                  value: 0.6,
-                  backgroundColor: const Color(0xFFEDF2FF),
-                  valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Delete'),
                 ),
               ],
+            );
+          },
+        );
+      },
+      onDismissed: (direction) async {
+        try {
+          await _wishlistService.deleteWishlistItem(itemId);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Item deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error deleting item: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      child: GestureDetector(
+        onTap: () async {
+          final newProgress = await showDialog<double>(
+            context: context,
+            builder: (BuildContext context) {
+              double tempProgress = progress;
+              return AlertDialog(
+                title: const Text('Update Progress'),
+                content: StatefulBuilder(
+                  builder: (context, setState) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('${(tempProgress * 100).toStringAsFixed(0)}%'),
+                        Slider(
+                          value: tempProgress,
+                          onChanged: (value) {
+                            setState(() {
+                              tempProgress = value;
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, tempProgress),
+                    child: const Text('Save'),
+                  ),
+                ],
+              );
+            },
+          );
+
+          if (newProgress != null && mounted) {
+            try {
+              await _wishlistService.updateItemProgress(itemId, newProgress);
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error updating progress: ${e.toString()}'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(
+              color: const Color(0xFFEDF2FF),
             ),
           ),
-          const SizedBox(width: 16),
-          Text(
-            '\$${amount.toStringAsFixed(2)}',
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF7AA4FF),
-            ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: const Color(0xFFEDF2FF),
+                      valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                '\$${amount.toStringAsFixed(2)}',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF7AA4FF),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

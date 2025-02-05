@@ -3,9 +3,43 @@ import 'personal_info_screen.dart';
 import 'settings_screen.dart';
 import 'package:budget_manager_app/widgets/rate_app_dialog.dart';
 import 'screens/help_center_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
+  String _displayName = '';
+  String _username = '';
+  String? _photoUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      final userData = await _firestore.collection('users').doc(user.uid).get();
+      if (userData.exists) {
+        setState(() {
+          _displayName = userData.data()?['fullName'] ?? user.displayName ?? '';
+          _username = userData.data()?['username'] ?? '';
+          _photoUrl = userData.data()?['photoUrl'] ?? user.photoURL;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,25 +126,26 @@ class ProfileScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: const CircleAvatar(
+                            child: CircleAvatar(
                               backgroundColor: Colors.white,
-                              child: Icon(Icons.person,
-                                  size: 50, color: Color(0xFF4B7BE5)),
+                              backgroundImage: _photoUrl != null ? NetworkImage(_photoUrl!) : null,
+                              child: _photoUrl == null ? const Icon(Icons.person,
+                                  size: 50, color: Color(0xFF4B7BE5)) : null,
                             ),
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            'kaouther ghedfa',
-                            style: TextStyle(
+                          Text(
+                            _displayName,
+                            style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF2D3142),
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            '@kaouther',
-                            style: TextStyle(
+                          Text(
+                            '@$_username',
+                            style: const TextStyle(
                               color: Color(0xFF9098B1),
                               fontSize: 16,
                             ),

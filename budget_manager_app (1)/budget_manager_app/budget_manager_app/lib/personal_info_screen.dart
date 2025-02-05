@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   const PersonalInfoScreen({super.key});
@@ -8,18 +10,86 @@ class PersonalInfoScreen extends StatefulWidget {
 }
 
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
-  // Initialize controllers with default placeholder text
-  final TextEditingController _fullNameController = TextEditingController(text: 'Full Name');
-  final TextEditingController _emailController = TextEditingController(text: 'Email');
-  final TextEditingController _usernameController = TextEditingController(text: 'Username');
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   String _selectedDate = 'Date of Birth';
   String _selectedGender = 'Gender';
   String _selectedCurrency = 'Currency';
+  bool _isLoading = false;
 
-  // List of options for dropdowns
   final List<String> _genderOptions = ['Gender', 'Female', 'Male'];
   final List<String> _currencyOptions = ['Currency', 'Dollar', 'Euro', 'Dinar'];
   final List<String> _dateOptions = ['Date of Birth', '22/05/2004', '23/05/2004', '24/05/2004'];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    setState(() => _isLoading = true);
+    try {
+      final User? user = _auth.currentUser;
+      if (user != null) {
+        final userData = await _firestore.collection('users').doc(user.uid).get();
+        if (userData.exists) {
+          final data = userData.data()!;
+          setState(() {
+            _fullNameController.text = data['fullName'] ?? '';
+            _emailController.text = data['email'] ?? user.email ?? '';
+            _usernameController.text = data['username'] ?? '';
+            _selectedDate = data['dateOfBirth'] ?? 'Date of Birth';
+            _selectedGender = data['gender'] ?? 'Gender';
+            _selectedCurrency = data['currency'] ?? 'Currency';
+          });
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading user data: $e')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _saveUserData() async {
+    setState(() => _isLoading = true);
+    try {
+      final User? user = _auth.currentUser;
+      if (user != null) {
+        // Update Firebase Auth display name
+        await user.updateDisplayName(_fullNameController.text);
+        
+        // Update Firestore data
+        await _firestore.collection('users').doc(user.uid).set({
+          'fullName': _fullNameController.text,
+          'email': _emailController.text,
+          'username': _usernameController.text,
+          'dateOfBirth': _selectedDate,
+          'gender': _selectedGender,
+          'currency': _selectedCurrency,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
+        Navigator.pop(context); // Go back to profile screen
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating profile: $e')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -81,6 +151,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (_isLoading)
+                        const Center(child: CircularProgressIndicator()),
                       // Profile Picture
                       Center(
                         child: Container(
@@ -121,27 +193,27 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       const SizedBox(height: 30),
                       
                       // Save Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
                         child: ElevatedButton(
-                          onPressed: () {
-                            // Handle save changes
-                          },
+                          onPressed: _isLoading ? null : _saveUserData,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF4B7BE5),
+                            minimumSize: const Size(double.infinity, 56),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                          child: const Text(
-                            'Save changes',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          child: _isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text(
+                                  'Save Changes',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
